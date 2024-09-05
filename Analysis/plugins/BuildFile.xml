@@ -1,0 +1,13 @@
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="FWCore/PluginManager"/>
+<use name="CommonTools/UtilAlgos"/>
+<use name="FWCore/ServiceRegistry"/>
+<use name="DataFormats/Common"/>
+<use name="DataFormats/Scouting"/>
+<use name="DataFormats/JetReco"/>
+<use name="DataFormats/PatCandidates"/>
+<use name="Run3ScoutingJetMETAnalysis/Utils"/>
+<use name="root"/>
+<use name="boost"/>
+<flags EDM_PLUGIN="1"/>
