@@ -12,7 +12,7 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
         #"file:ac2fde62-8866-4e50-8f36-77d604bfd4e1.root", # ScoutingPFRun3
-        "file:e4029e0e-090a-4096-8295-1e6e4faee6f9.root", # ScoutingPFMonitor 2024E
+        "file:e4029e0e-090a-4096-8295-1e6e4faee6f9.root", # ScoutingPFMonitor 2024F
         #"file:bfafe96c-4a6c-43a2-a711-762d7fec8530.root", # ScoutingPFMonitor 2023D
     ),
     #skipEvents = cms.untracked.uint32(9),
@@ -74,7 +74,8 @@ process.l1bitsScouting = l1bits.clone()
 
 process.l1bit_sequence = cms.Sequence(process.L1TRawToDigi + cms.Sequence(cms.Task(process.gtStage2DigisScouting, process.l1bitsScouting)))
 
-process.load("UserCode.Run3ScoutingJetMETAnalysis.JetIdProducer_cff")
+process.load("Run3ScoutingJetMETAnalysis.Analysis.JetIdProducer_cff")
+process.load("Run3ScoutingJetMETAnalysis.Analysis.Run3ScoutingPFMETProducer_cff")
 
 trigger_efficiency_task_matrix = {
   "2023_early" : { # until 2023C-v2, Run367620
@@ -82,7 +83,16 @@ trigger_efficiency_task_matrix = {
       cms.PSet(
           name=cms.string("DST_PFScouting_JetHT"), # this expr is taken from confdb, l1 seeds for path: DST_Run3_PFScoutingPixelTracking_v* (only hadronic, drop muon)
           expr=cms.vstring("L1_HTT200er", "L1_HTT255er", "L1_HTT280er", "L1_HTT320er", "L1_HTT360er", "L1_HTT400er", "L1_HTT450er", "L1_ETT2000", 
-            "L1_SingleJet180", "L1_SingleJet200", "L1_DoubleJet30er2p5_Mass_Min300_dEta_Max1p5", "L1_DoubleJet30er2p5_Mass_Min330_dEta_Max1p5", "L1_DoubleJet30er2p5_Mass_Min360_dEta_Max1p5")),
+            "L1_SingleJet180", "L1_SingleJet200", "L1_DoubleJet30er2p5_Mass_Min300_dEta_Max1p5", "L1_DoubleJet30er2p5_Mass_Min330_dEta_Max1p5", "L1_DoubleJet30er2p5_Mass_Min360_dEta_Max1p5")
+      ),
+      cms.PSet(expr=cms.vstring("L1_HTT200er")),
+      cms.PSet(expr=cms.vstring("L1_HTT255er")),
+      cms.PSet(expr=cms.vstring("L1_HTT280er")),
+      cms.PSet(expr=cms.vstring("L1_HTT320er")),
+      cms.PSet(expr=cms.vstring("L1_HTT360er")),
+      cms.PSet(expr=cms.vstring("L1_HTT400er")),
+      cms.PSet(expr=cms.vstring("L1_HTT450er")),
+      cms.PSet(expr=cms.vstring("L1_ETT2000")),
       cms.PSet(expr=cms.vstring("L1_SingleJet180")),
       cms.PSet(expr=cms.vstring("L1_SingleJet200")),
     ),
@@ -92,7 +102,16 @@ trigger_efficiency_task_matrix = {
     "signal_triggers" : cms.VPSet(
       cms.PSet(
         name=cms.string(""), # the actual path is DST_Run3_JetHT_PFScoutingPixelTracking. One l1 seed: L1_DoubleJet30er2p5_Mass_Min250_dEta_Max1p5 is added
-        expr=cms.vstring("DST_Run3_JetHT_PFScoutingPixelTracking")),
+        expr=cms.vstring("DST_Run3_JetHT_PFScoutingPixelTracking")
+      ),
+      cms.PSet(expr=cms.vstring("L1_HTT200er")),
+      cms.PSet(expr=cms.vstring("L1_HTT255er")),
+      cms.PSet(expr=cms.vstring("L1_HTT280er")),
+      cms.PSet(expr=cms.vstring("L1_HTT320er")),
+      cms.PSet(expr=cms.vstring("L1_HTT360er")),
+      cms.PSet(expr=cms.vstring("L1_HTT400er")),
+      cms.PSet(expr=cms.vstring("L1_HTT450er")),
+      cms.PSet(expr=cms.vstring("L1_ETT2000")),
       cms.PSet(expr=cms.vstring("L1_SingleJet180")),
       cms.PSet(expr=cms.vstring("L1_SingleJet200")),
     ),
@@ -101,6 +120,14 @@ trigger_efficiency_task_matrix = {
   "2024" : {
     "signal_triggers" : cms.VPSet(
       cms.PSet(expr=cms.vstring("DST_PFScouting_JetHT")),
+      cms.PSet(expr=cms.vstring("L1_HTT200er")),
+      cms.PSet(expr=cms.vstring("L1_HTT255er")),
+      cms.PSet(expr=cms.vstring("L1_HTT280er")),
+      cms.PSet(expr=cms.vstring("L1_HTT320er")),
+      cms.PSet(expr=cms.vstring("L1_HTT360er")),
+      cms.PSet(expr=cms.vstring("L1_HTT400er")),
+      cms.PSet(expr=cms.vstring("L1_HTT450er")),
+      cms.PSet(expr=cms.vstring("L1_ETT2000")),
       cms.PSet(expr=cms.vstring("L1_SingleJet180")),
       cms.PSet(expr=cms.vstring("L1_SingleJet200")),
     ),
@@ -113,28 +140,34 @@ trigger_efficiency_task = trigger_efficiency_task_matrix["2024"]
 
 process.ScoutingPFJetTriggerEfficiencyAnalyzer = cms.EDAnalyzer("ScoutingPFJetTriggerEfficiencyAnalyzer",
   jet = cms.untracked.InputTag("scoutingPFJetTightLeptonVetoId"),
+  met = cms.untracked.InputTag("scoutingPFMET"),
   muon = cms.untracked.InputTag("hltScoutingMuonPackerNoVtx"),
   #muon = cms.untracked.InputTag("hltScoutingMuonPacker", "", "HLT"),
   L1TriggerResults = cms.untracked.InputTag("l1bitsScouting"),
   HLTTriggerResults = cms.untracked.InputTag("TriggerResults", "",  "HLT"),
   **trigger_efficiency_task
 )
-process.scoutingPFJet_path = cms.Path(process.l1bit_sequence + process.scoutingPFJetTightLeptonVetoId + process.ScoutingPFJetTriggerEfficiencyAnalyzer)
+process.scoutingPFJet_path = cms.Path(process.l1bit_sequence + process.scoutingPFMET + process.scoutingPFJetTightLeptonVetoId + process.ScoutingPFJetTriggerEfficiencyAnalyzer)
 
 process.PuppiJetTriggerEfficiencyAnalyzer = cms.EDAnalyzer("PATJetTriggerEfficiencyAnalyzer",
   jet = cms.untracked.InputTag("offlinePuppiJetTightLeptonVetoId"),
+  met = cms.untracked.InputTag("slimmedMETsPuppi", "", "RECO"),
   muon = cms.untracked.InputTag("slimmedMuons", "", "RECO"),
   L1TriggerResults = cms.untracked.InputTag("l1bitsScouting"),
-  HLTTriggerResults = cms.untracked.InputTag("TriggerResults", "",  "HLT"), 
+  HLTTriggerResults = cms.untracked.InputTag("TriggerResults", "",  "HLT"),
+  jet_pt_func = cms.untracked.string("pt() * (1-jecFactor('Uncorrected'))"),
+  met_pt_func = cms.untracked.string("uncorPt"),
   **trigger_efficiency_task
 )
 process.PuppiJet_path = cms.Path(process.l1bit_sequence + process.offlinePuppiJetTightLeptonVetoId + process.PuppiJetTriggerEfficiencyAnalyzer)
 
 process.CHSJetTriggerEfficiencyAnalyzer = cms.EDAnalyzer("PATJetTriggerEfficiencyAnalyzer",
   jet = cms.untracked.InputTag("offlineCHSJetTightLeptonVetoId"),
+  met = cms.untracked.InputTag("slimmedMETs", "", "RECO"),
   muon = cms.untracked.InputTag("slimmedMuons", "", "RECO"),
   L1TriggerResults = cms.untracked.InputTag("l1bitsScouting"),
   HLTTriggerResults = cms.untracked.InputTag("TriggerResults", "",  "HLT"),
+  met_pt_func = cms.untracked.string("corPt('RawChs')"),
   **trigger_efficiency_task
 )
 process.CHSJet_path = cms.Path(process.l1bit_sequence + process.offlineCHSJetTightLeptonVetoId + process.CHSJetTriggerEfficiencyAnalyzer)
@@ -147,9 +180,11 @@ process.offlinePFJet = ak4PFJets.clone(
 
 process.PFJetTriggerEfficiencyAnalyzer = cms.EDAnalyzer("RecoPFJetTriggerEfficiencyAnalyzer",
   jet = cms.untracked.InputTag("offlinePFJetTightLeptonVetoId"),
+  met = cms.untracked.InputTag("slimmedMETs", "", "RECO"),
   muon = cms.untracked.InputTag("slimmedMuons", "", "RECO"),
   L1TriggerResults = cms.untracked.InputTag("l1bitsScouting"),
   HLTTriggerResults = cms.untracked.InputTag("TriggerResults", "",  "HLT"),
+  met_pt_func = cms.untracked.string("uncorPt"),
   **trigger_efficiency_task
 )
 process.PFJet_path = cms.Path(process.l1bit_sequence + process.offlinePFJet + process.offlinePFJetTightLeptonVetoId + process.PFJetTriggerEfficiencyAnalyzer)
