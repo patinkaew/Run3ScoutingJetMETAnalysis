@@ -74,7 +74,7 @@ process.l1bitsScouting = l1bits.clone()
 
 process.l1bit_sequence = cms.Sequence(process.L1TRawToDigi + cms.Sequence(cms.Task(process.gtStage2DigisScouting, process.l1bitsScouting)))
 
-process.load("Run3ScoutingAnalysis.Run3ScoutingJetMETAnalysis.JetIdProducer_cff")
+process.load("Run3ScoutingJetMETAnalysis.Analysis.JetIdProducer_cff")
 
 trigger_task_matrix = {
   "2023_early" : { # until 2023C-v2, Run367620
@@ -115,11 +115,11 @@ process.ScoutingPFJetToOfflinePuppiJetMatchingEfficiencyAnalyzer = cms.EDAnalyze
   object2_name = cms.untracked.string("OfflinePuppiJet"),
   object1_cut = cms.untracked.string("pt() > 30"),
   object2_cut = cms.untracked.string("pt() > 30"),
-  num_objects_to_match = cms.untracked.uint32(1),
+  num_objects_to_match = cms.untracked.uint32(4),
   L1TriggerResults = cms.untracked.InputTag("l1bitsScouting"),
   HLTTriggerResults = cms.untracked.InputTag("TriggerResults", "",  "HLT"),
-  #**trigger_task,
-  triggers = cms.VPSet(),
+  **trigger_task,
+  #triggers = cms.VPSet(),
 )
 process.path0 = cms.Path(process.l1bit_sequence + process.scoutingPFJetTightLeptonVetoId + process.offlinePuppiJetTightLeptonVetoId + process.ScoutingPFJetToOfflinePuppiJetMatchingEfficiencyAnalyzer)
 
@@ -136,11 +136,11 @@ process.ScoutingPFJetToOfflinePFJetMatchingEfficiencyAnalyzer = cms.EDAnalyzer("
   object2_name = cms.untracked.string("OfflinePFJet"),
   object1_cut = cms.untracked.string("pt() > 30"),
   object2_cut = cms.untracked.string("pt() > 30"),
-  num_objects_to_match = cms.untracked.uint32(1),
+  num_objects_to_match = cms.untracked.uint32(4),
   L1TriggerResults = cms.untracked.InputTag("l1bitsScouting"),
   HLTTriggerResults = cms.untracked.InputTag("TriggerResults", "",  "HLT"),
-  #**trigger_task,
-  triggers = cms.VPSet(),
+  **trigger_task,
+  #triggers = cms.VPSet(),
 )
 process.path1 = cms.Path(process.l1bit_sequence + process.offlinePFJet + process.scoutingPFJetTightLeptonVetoId + process.offlinePFJetTightLeptonVetoId + process.ScoutingPFJetToOfflinePFJetMatchingEfficiencyAnalyzer)
 
