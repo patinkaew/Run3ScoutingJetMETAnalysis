@@ -77,7 +77,7 @@ private:
   std::vector<std::vector<std::string>> triggers_; // trigger expressions
 
   // histograms
-  std::vector<TH1D*> dijet_mass_histograms;
+  std::vector<TH1D*> dijet_mass_histograms_;
 };
 
 template <typename JetType>
@@ -97,7 +97,7 @@ DijetTriggerEfficiencyAnalyzer<JetType>::DijetTriggerEfficiencyAnalyzer(const ed
   std::string no_trigger_name = "No_Trigger";
   trigger_names.push_back(no_trigger_name);
 
-  auto trigger_vpset = iConfig.getParameter<std::vector<edm::ParameterSet>>("triggers");
+  auto trigger_vpset = iConfig.getParameter<std::vector<edm::ParameterSet>>("signal_triggers");
   for (auto const &trigger_pset : trigger_vpset) {
     std::vector<std::string> trigger = trigger_pset.getParameter<std::vector<std::string>>("expr");
     std::string trigger_name = trigger_pset.getParameter<std::string>("name");
@@ -105,9 +105,12 @@ DijetTriggerEfficiencyAnalyzer<JetType>::DijetTriggerEfficiencyAnalyzer(const ed
     triggers_.push_back(trigger);
     trigger_names.push_back(trigger_name);
   }
-
+  
+  // initialize histograms
   TFileDirectory dijet_mass_dir = fs_->mkdir("dijet_mass");
-  dijet_mass_dir.make<TH1D>(no_trigger_name.c_str(), ";m_{jj} (GeV); Events", 100, 0., 1000.);
+  for (const auto &trigger_name : trigger_names) {
+    dijet_mass_histograms_.push_back(dijet_mass_dir.make<TH1D>(trigger_name.c_str(), ";m_{jj} (GeV); Events", 100, 0., 1000.));
+  }
 }
 
 template <typename JetType>
@@ -195,14 +198,14 @@ void DijetTriggerEfficiencyAnalyzer<JetType>::analyze(const edm::Event& iEvent, 
   //unsigned int ihistogram = 0;
   
   // No trigger first
-  dijet_mass_histograms[0]->Fill(max_dijet_mass);
+  dijet_mass_histograms_[0]->Fill(max_dijet_mass);
 
   // with trigger
   for (unsigned int itrigger = 0; itrigger < triggers_.size(); itrigger++) {
     auto trigger = triggers_[itrigger];
     bool trigger_accept = util::isAnyTriggerAccept(trigger, *l1TriggerResults_handle, hltTriggerResultsByName);
     if (trigger_accept) {
-      dijet_mass_histograms[itrigger+1]->Fill(max_dijet_mass);
+      dijet_mass_histograms_[itrigger+1]->Fill(max_dijet_mass);
     }
   }
 }
@@ -221,3 +224,7 @@ DEFINE_FWK_MODULE(ScoutingPFJetDijetTriggerEfficiencyAnalyzer);
 #include "DataFormats/PatCandidates/interface/Jet.h"
 using PATJetDijetTriggerEfficiencyAnalyzer = DijetTriggerEfficiencyAnalyzer<pat::Jet>;
 DEFINE_FWK_MODULE(PATJetDijetTriggerEfficiencyAnalyzer);
+
+#include "DataFormats/JetReco/interface/PFJet.h"
+using RecoPFJetDijetTriggerEfficiencyAnalyzer = DijetTriggerEfficiencyAnalyzer<reco::PFJet>;
+DEFINE_FWK_MODULE(RecoPFJetDijetTriggerEfficiencyAnalyzer);
