@@ -155,7 +155,7 @@ process.PuppiJetTriggerEfficiencyAnalyzer = cms.EDAnalyzer("PATJetTriggerEfficie
   muon = cms.untracked.InputTag("slimmedMuons", "", "RECO"),
   L1TriggerResults = cms.untracked.InputTag("l1bitsScouting"),
   HLTTriggerResults = cms.untracked.InputTag("TriggerResults", "",  "HLT"),
-  jet_pt_func = cms.untracked.string("pt() * (1-jecFactor('Uncorrected'))"),
+  jet_pt_func = cms.untracked.string("pt() * jecFactor('Uncorrected')"),
   met_pt_func = cms.untracked.string("uncorPt"),
   **trigger_efficiency_task
 )
@@ -167,6 +167,7 @@ process.CHSJetTriggerEfficiencyAnalyzer = cms.EDAnalyzer("PATJetTriggerEfficienc
   muon = cms.untracked.InputTag("slimmedMuons", "", "RECO"),
   L1TriggerResults = cms.untracked.InputTag("l1bitsScouting"),
   HLTTriggerResults = cms.untracked.InputTag("TriggerResults", "",  "HLT"),
+  jet_pt_func = cms.untracked.string("pt() * jecFactor('Uncorrected')"),
   met_pt_func = cms.untracked.string("corPt('RawChs')"),
   **trigger_efficiency_task
 )
