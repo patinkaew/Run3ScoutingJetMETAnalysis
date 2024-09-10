@@ -6,7 +6,7 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(10000)
 )
 
 process.source = cms.Source("PoolSource",
@@ -98,9 +98,9 @@ trigger_task_matrix = {
   },
   "2024" : {
     "triggers" : cms.VPSet(
-      cms.PSet(expr=cms.vstring("DST_PFScouting_JetHT")),
-      cms.PSet(expr=cms.vstring("L1_SingleJet180")),
-      cms.PSet(expr=cms.vstring("L1_SingleJet200")),
+      #cms.PSet(expr=cms.vstring("DST_PFScouting_JetHT")),
+      #cms.PSet(expr=cms.vstring("L1_SingleJet180")),
+      #cms.PSet(expr=cms.vstring("L1_SingleJet200")),
     ),
   }
 }

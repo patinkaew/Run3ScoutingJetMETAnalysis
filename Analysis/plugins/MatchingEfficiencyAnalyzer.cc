@@ -153,7 +153,7 @@ MatchingEfficiencyAnalyzer<ObjType1, ObjType2>::MatchingEfficiencyAnalyzer(const
   }
   
   // prepare directories in files and histograms
-  eta_ranges_ = {0.0, 0.5, 1.0, 1.5, 1.5, 2.0, 2.6, 2.7, 3.0, 5.0};
+  eta_ranges_ = {0.0, 0.5}; //{0.0, 0.5, 1.0, 1.5, 2.0, 2.6, 2.7, 3.0, 5.0};
 
   for (auto const &trigger_name : trigger_names) {
     TFileDirectory trigger_dir = fs_->mkdir(trigger_name.c_str());
@@ -253,7 +253,7 @@ void MatchingEfficiencyAnalyzer<ObjType1, ObjType2>::analyze(const edm::Event& i
     } else {
       // if number of objects are less than requested number to match, set flag to false
       // the vector is already initialized with false filled, so we don't need to do anything
-      // we do it anything for clarity
+      // we do it anyway for clarity
       obj1_match_flags[iobj1] = false;
     }
   }
@@ -268,7 +268,7 @@ void MatchingEfficiencyAnalyzer<ObjType1, ObjType2>::analyze(const edm::Event& i
     } else {
       // if number of objects are less than requested number to match, set flag to false
       // the vector is already initialized with false filled, so we don't need to do anything
-      // we do it anything for clarity
+      // we do it anyway for clarity
       obj2_match_flags[iobj2] = false;
     }
   }
@@ -319,7 +319,7 @@ void MatchingEfficiencyAnalyzer<ObjType1, ObjType2>::analyze(const edm::Event& i
     if (has_object1) {
       pt_histograms[offset + object1_ieta*4]->Fill(object1_pt);
       if (obj1_match_flags[iobj]) {
-        pt_histograms[offset + object1_ieta*4+1]->Fill(object1_pt);
+        pt_histograms[offset + object1_ieta*4 + 1]->Fill(object1_pt);
       }
     }
     if (has_object2) {
