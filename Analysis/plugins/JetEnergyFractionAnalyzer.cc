@@ -209,13 +209,13 @@ void JetEnergyFractionAnalyzer<JetType>::fillDescriptions(edm::ConfigurationDesc
 
   std::vector<edm::ParameterSet> fraction_vpset;
   std::vector<std::string> fraction_default_names = { 
-                                                      "Charged_Hadron", "Neutral_Hadron", "Neutral_Hadron_noHF",
+                                                      "Charged_Hadron", "Neutral_Hadron",
                                                       "Charged_EM", "Neutral_EM",
                                                       "Electron", "Photon", "Muon",
                                                       "HF_Hadron", "HF_EM"
                                                     };
   std::vector<std::string> fraction_default_labels = { 
-                                                       "Charged Hadron Energy Fraction", "Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction (no HF)",
+                                                       "Charged Hadron Energy Fraction", "Neutral Hadron Energy Fraction",
                                                        "Charged EM Energy Fraction", "Neutral EM Energy Fraction",
                                                        "Electron Energy Fraction", "Photon Energy Fraction", "Muon Energy Fraction",
                                                        "HF Hadron Energy Fraction", "HF EM Energy Fraction"
@@ -325,3 +325,7 @@ DEFINE_FWK_MODULE(ScoutingPFJetEnergyFractionAnalyzer);
 #include "DataFormats/PatCandidates/interface/Jet.h"
 using PATJetEnergyFractionAnalyzer = JetEnergyFractionAnalyzer<pat::Jet>;
 DEFINE_FWK_MODULE(PATJetEnergyFractionAnalyzer);
+
+#include "DataFormats/JetReco/interface/PFJet.h"
+using RecoPFJetEnergyFractionAnalyzer = JetEnergyFractionAnalyzer<reco::PFJet>;
+DEFINE_FWK_MODULE(RecoPFJetEnergyFractionAnalyzer);
