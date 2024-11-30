@@ -6,7 +6,7 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(-1)
 )
 
 process.source = cms.Source("PoolSource",
@@ -128,6 +128,8 @@ trigger_task_matrix = {
       #cms.PSet(expr=cms.vstring("L1_ETT2000")),
       #cms.PSet(expr=cms.vstring("L1_SingleJet180")),
       #cms.PSet(expr=cms.vstring("L1_SingleJet200")),
+      cms.PSet(expr=cms.vstring("L1_ZeroBias")),
+      cms.PSet(expr=cms.vstring("DST_PFScouting_ZeroBias")),
     ),
   }
 }
@@ -164,6 +166,9 @@ process.OfflinePuppiJet = cms.EDAnalyzer("PATJetEnergyFractionAnalyzer",
   L1TriggerResults = cms.InputTag("l1bitsScouting"),
   HLTTriggerResults = cms.InputTag("TriggerResults", "",  "HLT"),
   cut = cms.string("pt()>20"),
+  jet_pt_func = cms.string("correctedP4('Uncorrected').Pt()"),
+  jet_eta_func = cms.string("correctedP4('Uncorrected').Eta()"),
+  jet_phi_func = cms.string("correctedP4('Uncorrected').Phi()"),
   num_jets_to_fill = cms.int32(-1),
   energy_fractions = cms.VPSet( # undo corrections
     cms.PSet(name=cms.string("Charged_Hadron"), label=cms.string("Charged Hadron Energy Fraction"), func=cms.string("correctedJet('Uncorrected').chargedHadronEnergyFraction()")),
