@@ -32,6 +32,7 @@
 // ROOT include files
 #include "TH1.h"
 #include "TH2.h"
+#include "TH3.h"
 
 // C++ include files
 #include <iostream>
@@ -79,8 +80,12 @@ private:
   int num_objects_to_fill_;
 
   // histograms
+  std::vector<TH1D*> pt_histograms_;
+  std::vector<TH1D*> eta_histograms_;
+  std::vector<TH1D*> phi_histograms_;
   std::vector<TH2D*> eta_phi_histograms_;
   std::vector<TH2D*> eta_pt_histograms_;
+  std::vector<TH3D*> eta_phi_pt_histograms_;
 };
 
 template <typename ObjectType>
@@ -132,16 +137,26 @@ ObjectDistributionAnalyzer<ObjectType>::ObjectDistributionAnalyzer(const edm::Pa
     for (auto const &trigger_name : trigger_names) {
       TFileDirectory trigger_dir = fs_->mkdir(trigger_name.c_str());
 
-      eta_phi_histograms_.push_back(trigger_dir.make<TH2D>("eta-phi", ";#eta; #phi; Events", 50, -3., 3., 50, -M_PI, M_PI));
-      eta_pt_histograms_.push_back(trigger_dir.make<TH2D>("eta-pt", ";#eta; pT (GeV); Events", 50, -3., 3., 50, 0., 500.));
+      pt_histograms_.push_back(trigger_dir.make<TH1D>("pt", ";p_{T} (GeV);Events", 50, 0., 300.));
+      eta_histograms_.push_back(trigger_dir.make<TH1D>("eta", ";#eta;Events", 50, -3., 3.));
+      phi_histograms_.push_back(trigger_dir.make<TH1D>("phi", ";#phi;Events", 50, -M_PI, M_PI));
+      eta_phi_histograms_.push_back(trigger_dir.make<TH2D>("eta-phi", ";#eta;#phi;Events", 50, -3., 3., 50, -M_PI, M_PI));
+      eta_pt_histograms_.push_back(trigger_dir.make<TH2D>("eta-pt", ";#eta;p_{T} (GeV);Events", 50, -3., 3., 50, 0., 300.));
+      eta_phi_pt_histograms_.push_back(trigger_dir.make<TH3D>("eta-phi-pt", ";#eta;#phi;p_{T} (GeV);Events", 50, -3., 3., 50, -M_PI, M_PI, 50, 0., 300.));
     }
   } else {
     for (auto const &category_name : category_names) {
       TFileDirectory category_dir = fs_->mkdir(category_name.c_str());
       for (auto const &trigger_name : trigger_names) {
         TFileDirectory trigger_dir = category_dir.mkdir(trigger_name.c_str());
+
+
+        pt_histograms_.push_back(trigger_dir.make<TH1D>("pt", ";p_{T} (GeV);Events", 50, 0., 300.));
+        eta_histograms_.push_back(trigger_dir.make<TH1D>("eta", ";#eta;Events", 50, -3., 3.));
+        phi_histograms_.push_back(trigger_dir.make<TH1D>("phi", ";#phi;Events", 50, -M_PI, M_PI));
         eta_phi_histograms_.push_back(trigger_dir.make<TH2D>("eta-phi", ";#eta; #phi; Events", 50, -3., 3., 50, -M_PI, M_PI));
-        eta_pt_histograms_.push_back(trigger_dir.make<TH2D>("eta-pt", ";#eta; pT (GeV); Events", 50, -3., 3., 50, 0., 500.));
+        eta_pt_histograms_.push_back(trigger_dir.make<TH2D>("eta-pt", ";#eta; pT (GeV); Events", 50, -3., 3., 50, 0., 300.));
+        eta_phi_pt_histograms_.push_back(trigger_dir.make<TH3D>("eta-phi-pt", ";#eta;#phi;p_{T} (GeV);Events", 50, -3., 3., 50, -M_PI, M_PI, 50, 0., 300.));
       }
     }
   } 
@@ -214,15 +229,23 @@ void ObjectDistributionAnalyzer<ObjectType>::analyze(const edm::Event& iEvent, c
     if (cut_(object)) {
       if (category_cuts_.size() == 0) { // no categorization
         // no trigger
+        pt_histograms_[0]->Fill(object_pt_func_(object));
+        eta_histograms_[0]->Fill(object_eta_func_(object));
+        phi_histograms_[0]->Fill(object_phi_func_(object));
         eta_phi_histograms_[0]->Fill(object_eta_func_(object), object_phi_func_(object));
         eta_pt_histograms_[0]->Fill(object_eta_func_(object), object_pt_func_(object));
+        eta_phi_pt_histograms_[0]->Fill(object_eta_func_(object), object_phi_func_(object), object_pt_func_(object));
         // with trigger
         for (unsigned int itrigger = 0; itrigger < triggers_.size(); itrigger++) {
           auto trigger = triggers_[itrigger];
           bool trigger_accept = util::isAnyTriggerAccept(trigger, *l1TriggerResults_handle, hltTriggerResultsByName);
           if (trigger_accept) {
+            pt_histograms_[itrigger+1]->Fill(object_pt_func_(object));
+            eta_histograms_[itrigger+1]->Fill(object_eta_func_(object));
+            phi_histograms_[itrigger+1]->Fill(object_phi_func_(object));
             eta_phi_histograms_[itrigger+1]->Fill(object_eta_func_(object), object_phi_func_(object));
             eta_pt_histograms_[itrigger+1]->Fill(object_eta_func_(object), object_pt_func_(object));
+            eta_phi_pt_histograms_[itrigger+1]->Fill(object_eta_func_(object), object_phi_func_(object), object_pt_func_(object));
           }
         }
       } else { // categorization
@@ -230,15 +253,23 @@ void ObjectDistributionAnalyzer<ObjectType>::analyze(const edm::Event& iEvent, c
           unsigned int offset = icategory * (triggers_.size() + 1); // each category has (num_trigger+1) subdirectories
           if (category_cuts_[icategory](object)) {
             // no trigger
+            pt_histograms_[offset]->Fill(object_pt_func_(object));
+            eta_histograms_[offset]->Fill(object_eta_func_(object));
+            phi_histograms_[offset]->Fill(object_phi_func_(object));
             eta_phi_histograms_[offset]->Fill(object_eta_func_(object), object_phi_func_(object));
             eta_pt_histograms_[offset]->Fill(object_eta_func_(object), object_pt_func_(object));
+            eta_phi_pt_histograms_[offset]->Fill(object_eta_func_(object), object_phi_func_(object), object_pt_func_(object));
             // with trigger
             for (unsigned int itrigger = 0; itrigger < triggers_.size(); itrigger++) {
               auto trigger = triggers_[itrigger];
               bool trigger_accept = util::isAnyTriggerAccept(trigger, *l1TriggerResults_handle, hltTriggerResultsByName);
               if (trigger_accept) {
+                pt_histograms_[offset+itrigger+1]->Fill(object_pt_func_(object));
+                eta_histograms_[offset+itrigger+1]->Fill(object_eta_func_(object));
+                phi_histograms_[offset+itrigger+1]->Fill(object_phi_func_(object));
                 eta_phi_histograms_[offset+itrigger+1]->Fill(object_eta_func_(object), object_phi_func_(object));
                 eta_pt_histograms_[offset+itrigger+1]->Fill(object_eta_func_(object), object_pt_func_(object));
+                eta_phi_pt_histograms_[offset+itrigger+1]->Fill(object_eta_func_(object), object_phi_func_(object), object_pt_func_(object));
               }
             }
           }
