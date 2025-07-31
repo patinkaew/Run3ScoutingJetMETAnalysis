@@ -13,7 +13,7 @@ bool util::isAnyTriggerAccept(const std::vector<std::string> &triggers, const ed
     } else {
       for (size_t itrigger = 0; itrigger < hltTriggerResultsByName.size(); itrigger++) {
         std::string trigger_name = hltTriggerResultsByName.triggerName(itrigger);
-        if (trigger_name.compare(0, trigger.length(), trigger) == 0) { // ignore _v*
+        if (trigger_name.compare(0, trigger.length()+2, trigger+"_v") == 0) { // ignore _v*
           if (hltTriggerResultsByName.accept(itrigger)) return true;
         }
       }
